@@ -1,5 +1,9 @@
 remove_punct = True
-remove_stopwords = True
-remove_nums = False
-lemmatize = True
-stemming = True
+remove_stopwords = False
+remove_nums = True
+strip_xml = True
+min_len_chars = 3
+max_len_tokens = 100
+sample_frac = 0.1
+random_state = 42
+custom_nl_stopwords = ["we", "wij", "onze"]

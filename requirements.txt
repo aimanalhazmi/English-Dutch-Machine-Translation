@@ -8,3 +8,4 @@ spacy~=3.8.7
 WordCloud~=1.9.4
 black~=25.1.0
 wandb~=0.16.6
+tqdm
