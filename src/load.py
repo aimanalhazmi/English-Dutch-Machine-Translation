@@ -6,9 +6,9 @@ def load_data(file):
         return [line.strip() for line in data]
 
 
-def load_data_as_df(en_file, nl_file):
-    print(f"Loading English Corpora from: {en_file} ...")
-    en_corpora = load_data(en_file)
-    print(f"Loading Dutch Corpora from: {nl_file} ...")
-    nl_corpora = load_data(nl_file)
-    return pd.DataFrame({"English": en_corpora, "Dutch": nl_corpora})
+def load_data_as_df(source_file, source_col, target_file, target_col):
+    print(f"Loading {source_col} Corpora from: {source_file} ...")
+    en_corpora = load_data(source_file)
+    print(f"Loading {target_col} Corpora from: {target_file} ...\n")
+    nl_corpora = load_data(target_file)
+    return pd.DataFrame({f"{source_col}": en_corpora, f"{target_col}": nl_corpora})

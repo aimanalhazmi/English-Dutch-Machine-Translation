@@ -8,7 +8,9 @@ __pycache__/
 outputs
 wandb
 
-# Ignore everything in data/
+# Ignore everything in data/ embedding_models/
 data/*
+embedding_models/*
 # Except README.md
 !data/README.md
+!embedding_models/README.md
