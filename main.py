@@ -1,3 +1,5 @@
+import os
+
 import torch
 from src.preprocessing import preprocess_dataframe, get_tokenized_vocab
 from src.load import load_data_as_df
@@ -38,6 +40,7 @@ if __name__ == '__main__':
     src_vocab = PretrainedEmbeddingVocab(embedding_path=src_emb_path, embedding_dim=config.embedding_dim, restrict_to_vocab=src_vocab_set)
     tgt_vocab = PretrainedEmbeddingVocab(embedding_path=tgt_emb_path, embedding_dim=config.embedding_dim, restrict_to_vocab=tgt_vocab_set)
 
+    os.makedirs("outputs", exist_ok=True)
     train_loss, val_loss, bleu_scores = train.train_evaluate(df_train=df_train, df_val=df_val, src_vocab=src_vocab, tgt_vocab=tgt_vocab, device=DEVICE)
 
     # Plot
