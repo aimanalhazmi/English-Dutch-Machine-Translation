@@ -5,7 +5,7 @@ class Encoder(nn.Module):
     def __init__(self, input_dim, emb_dim, hid_dim, embeddings=None, dropout=0.5):
         super().__init__()
         if embeddings is not None:
-            self.embedding = nn.Embedding.from_pretrained(embeddings, freeze=False, padding_idx=0)
+            self.embedding = nn.Embedding.from_pretrained(embeddings.vectors, freeze=False, padding_idx=embeddings.stoi["<pad>"])
         else:
             self.embedding = nn.Embedding(input_dim, emb_dim, padding_idx=0)
 
@@ -21,7 +21,7 @@ class Decoder(nn.Module):
     def __init__(self, output_dim, emb_dim, hid_dim, embeddings=None, dropout=0.5):
         super().__init__()
         if embeddings is not None:
-            self.embedding = nn.Embedding.from_pretrained(embeddings, freeze=False, padding_idx=0)
+            self.embedding = nn.Embedding.from_pretrained(embeddings.vectors, freeze=False, padding_idx=embeddings.stoi["<pad>"])
         else:
             self.embedding = nn.Embedding(output_dim, emb_dim, padding_idx=0)
 

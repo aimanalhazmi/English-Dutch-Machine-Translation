@@ -49,8 +49,8 @@ def train_evaluate(df_train, df_val, src_vocab, tgt_vocab, device="cpu"):
     print(f"[Info] Model will be trained to translate from {config.source_col} → {config.target_col}\n")
     train_loader = DataLoader(train_ds, batch_size=config.batch_size, shuffle=True, collate_fn=collate_fn)
 
-    encoder = Encoder(len(src_vocab), config.embedding_dim, hid_dim=config.embedding_dim, embeddings=src_vocab.vectors)
-    decoder = Decoder(len(tgt_vocab), config.embedding_dim, hid_dim=config.embedding_dim, embeddings=tgt_vocab.vectors)
+    encoder = Encoder(len(src_vocab), config.embedding_dim, hid_dim=config.embedding_dim, embeddings=src_vocab)
+    decoder = Decoder(len(tgt_vocab), config.embedding_dim, hid_dim=config.embedding_dim, embeddings=tgt_vocab)
     model = Seq2Seq(encoder, decoder, device).to(device)
 
     optimizer = torch.optim.Adam(model.parameters())
