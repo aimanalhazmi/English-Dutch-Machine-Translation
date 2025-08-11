@@ -4,12 +4,14 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from collections import Counter
 import spacy
-import config
 from tqdm import tqdm
+import wandb
 
 tqdm.pandas()
 nl_nlp = spacy.load("nl_core_news_sm")
 en_nlp = spacy.load("en_core_web_sm")
+
+config = wandb.config
 
 
 def remove_stop_words(text, stopWords) -> str:
