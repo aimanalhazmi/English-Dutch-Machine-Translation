@@ -5,15 +5,12 @@ from nltk.tokenize import word_tokenize
 from collections import Counter
 import spacy
 from tqdm import tqdm
-import wandb
 
 tqdm.pandas()
 spacy.cli.download("nl_core_news_sm") 
 spacy.cli.download("en_core_web_sm") 
 nl_nlp = spacy.load("nl_core_news_sm")
 en_nlp = spacy.load("en_core_web_sm")
-
-config = wandb.config
 
 
 def remove_stop_words(text, stopWords) -> str:
@@ -44,7 +41,7 @@ def get_tokenized_vocab(df, lan, min_freq=2):
     vocab = [word for word, freq in counter.items() if freq >= min_freq]
     return set(vocab)
 
-def get_stopwords(lan: str) -> set:
+def get_stopwords(lan: str, config) -> set:
     """
     Returns a set of stopwords for the given language.
     Supports only 'English' and 'Dutch'.
@@ -59,7 +56,7 @@ def get_stopwords(lan: str) -> set:
     else:
         raise ValueError("Language must be 'English' or 'Dutch'")
 
-def preprocess_text(text: str, lan: str) -> str:
+def preprocess_text(text: str, lan: str, config) -> str:
     """
     Preprocesses a given text string by applying normalization, punctuation removal,
     stopword removal, and number removal based on configuration flags.
@@ -99,7 +96,7 @@ def preprocess_text(text: str, lan: str) -> str:
 
     return text
 
-def preprocess_dataframe(df, source_col, target_col):
+def preprocess_dataframe(df, source_col, target_col, config):
 
     print(f"[Start Preprocessing] Total raw rows: {len(df):,}")
 
@@ -111,8 +108,8 @@ def preprocess_dataframe(df, source_col, target_col):
 
     # Preprocess text
     print("[Step 2] Preprocessing each row ...")
-    df[source_col] = df[source_col].progress_apply(lambda x: preprocess_text(x, source_col))
-    df[target_col] = df[target_col].progress_apply(lambda x: preprocess_text(x, target_col))
+    df[source_col] = df[source_col].progress_apply(lambda x: preprocess_text(x, source_col, config))
+    df[target_col] = df[target_col].progress_apply(lambda x: preprocess_text(x, target_col, config))
 
     # Drop duplicates
     before = len(df)

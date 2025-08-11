@@ -25,7 +25,7 @@ def main():
         }
 
         df = load_data_as_df(source_file=data_files[config.src_lang], source_col=config.src_lang, target_file=data_files[config.tgt_lang], target_col=config.tgt_lang)
-        df_clean = preprocess_dataframe(df=df, source_col=config.src_lang, target_col=config.tgt_lang)
+        df_clean = preprocess_dataframe(df=df, source_col=config.src_lang, target_col=config.tgt_lang, config=config)
         df_sampled = df_clean.sample(frac=config.sample_frac, random_state=0).reset_index(drop=True)
         print(f"[Info] Selected {len(df_sampled):,} rows out of {len(df_clean):,} ({config.sample_frac * 100:.1f}% of preprocessed data)")
         train_df, val_df, test_df = split_dataset(df_sampled, val_test_size=config.val_test_size, test_size=config.test_size, random_state=0)
