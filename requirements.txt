@@ -12,3 +12,4 @@ gensim~=4.3.3
 torch
 torchmetrics
 tqdm
+lightning==2.5.2
