@@ -26,7 +26,7 @@ def tokenizer_nl(text):
     return [token.text for token in nl_nlp.tokenizer(text)]
 
 
-def get_tokenized_vocab(df, lan, min_freq=1):
+def get_tokenized_vocab(df, lan, min_freq=2):
     lan = lan.strip().capitalize()
     if lan == "English":
         tokenizer = tokenizer_en

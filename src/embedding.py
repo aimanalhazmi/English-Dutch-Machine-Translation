@@ -10,6 +10,13 @@ class PretrainedEmbeddingVocab:
         self.stoi = {}  # string-to-index
         self.vectors = []
 
+        # Add special tokens (in the front)
+        for token in ["<pad>", "<unk>", "<sos>", "<eos>"]:
+            if token not in self.stoi:
+                self.stoi[token] = len(self.itos)
+                self.itos.append(token)
+                self.vectors.append([0.0] * embedding_dim)
+
         print(f"[info] Loading pretrained embedding from {embedding_path}]")
 
         with open(embedding_path, "r", encoding="utf-8") as f:
@@ -33,13 +40,6 @@ class PretrainedEmbeddingVocab:
                 self.stoi[word] = len(self.itos)
                 self.itos.append(word)
                 self.vectors.append(vector)
-
-        # Add special tokens
-        for token in ["<pad>", "<sos>", "<eos>", "<unk>"]:
-            if token not in self.stoi:
-                self.stoi[token] = len(self.itos)
-                self.itos.append(token)
-                self.vectors.append([0.0] * embedding_dim)
 
         # Convert vectors to tensor
         self.vectors = torch.tensor(np.array(self.vectors), dtype=torch.float32)
