@@ -33,7 +33,7 @@ parameters:
     value: ["we", "wij", "onze"]
   # data sampling
   sample_frac:
-    value: 0.01
+    value: 0.02
   val_test_size:
     value: 0.4
   test_size:
@@ -44,18 +44,18 @@ parameters:
   batch_size:
     value: 128
   hidden_dim:
-    value: 512
+    value: 1024
   n_layers:
-    value: 2
+    value: 3
   p_dropout:
     value: 0.1
   freeze_embeddings:
-    value: False
+    value: True
   teacher_forcing_ratio:
     value: 0.5
   teacher_forcing_ratio_decay:
-    value: 0.95
+    value: 0.98
   learning_rate:
-    value: !!float 1e-3
+    value: !!float 1e-4
   gradient_clip_val:
     value: 1.0

@@ -62,7 +62,7 @@ def main():
         )
 
         # init trainer + callbacks
-        early_stopping_callback = EarlyStopping(monitor="val_loss", patience=3)
+        early_stopping_callback = EarlyStopping(monitor="val_loss", patience=5)
         progress_bar_callback = TQDMProgressBar(refresh_rate=25)
         checkpoint_callback = ModelCheckpoint(
             dirpath = "checkpoints",
