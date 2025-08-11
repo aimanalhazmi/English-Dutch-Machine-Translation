@@ -128,7 +128,7 @@ class Seq2SeqModel(lightning.LightningModule):
         tgt_vocab_size = self.decoder.fc.out_features
 
         # decoder outputs
-        outputs = torch.zeros(batch_size, tgt_length, tgt_vocab_size)
+        outputs = torch.zeros(batch_size, tgt_length, tgt_vocab_size, device=self.device)
 
         # calculate context vector from encoder 
         hidden, cell = self.encoder(src_sent)   # hidden/cell: (n_layers, batch_size, hidden_dim)
