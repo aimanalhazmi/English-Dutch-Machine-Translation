@@ -170,7 +170,7 @@ class Seq2SeqModel(lightning.LightningModule):
         loss = self.loss_fn(y_logit, tgt_sent)
 
         # logging
-        self.log("train_loss", loss, on_step=True, on_epoch=True)
+        self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
         self.log("teacher_forcing_ratio", self.teacher_forcing_ratio, on_epoch=True, on_step=False)
 
         return loss
@@ -190,7 +190,7 @@ class Seq2SeqModel(lightning.LightningModule):
         loss = self.loss_fn(y_logit, tgt_sent)
 
         # logging
-        self.log("val_loss", loss, on_step=True, on_epoch=True)
+        self.log("val_loss", loss, on_epoch=True, prog_bar=True)
 
         return loss
     
@@ -209,7 +209,7 @@ class Seq2SeqModel(lightning.LightningModule):
         loss = self.loss_fn(y_logit, tgt_sent)
 
         # logging
-        self.log("test_loss", loss, on_step=True, on_epoch=True)
+        self.log("test_loss", loss, on_epoch=True, prog_bar=True)
 
         return loss
     
