@@ -8,6 +8,8 @@ from tqdm import tqdm
 import wandb
 
 tqdm.pandas()
+spacy.cli.download("nl_core_news_sm") 
+spacy.cli.download("en_core_web_sm") 
 nl_nlp = spacy.load("nl_core_news_sm")
 en_nlp = spacy.load("en_core_web_sm")
 
