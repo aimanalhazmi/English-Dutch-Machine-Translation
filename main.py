@@ -73,13 +73,28 @@ def main():
             mode = "min"
         )
 
+        # callback for debugging
+        class DebugCallback(lightning.Callback):
+
+            def __init__(self):
+                super().__init__()
+
+            def on_train_epoch_start(self, trainer, model):
+
+                trainer.logger.experiment.log({
+                    "debug/unk_embedding": model.encoder.embedding.weight[1],
+                    "debug/fixed_embedding": model.encoder.embedding.weight[10]
+                })
+
+        debug_callback = DebugCallback()
+
         trainer = lightning.Trainer(
             max_epochs = config.n_epochs,
             gradient_clip_val = config.gradient_clip_val,
             accelerator = "gpu" if torch.cuda.is_available() else "cpu",
             devices = 1,
             logger = logger,
-            callbacks = [early_stopping_callback, progress_bar_callback, checkpoint_callback],
+            callbacks = [early_stopping_callback, progress_bar_callback, checkpoint_callback, debug_callback],
             log_every_n_steps = 10,
             check_val_every_n_epoch = 1
         )
