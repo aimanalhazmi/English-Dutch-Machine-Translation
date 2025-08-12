@@ -201,7 +201,7 @@ class Seq2SeqModel(lightning.LightningModule):
         self.log("teacher_forcing_ratio", self.teacher_forcing_ratio, on_epoch=True, on_step=False)
 
         if batch_idx == 0:
-            self._log_translations(src_sent, y_logit, tgt_sent, n_examples=5)
+            self._log_translations(src_sent[:,1:], y_logit, tgt_sent, mode="train", n_examples=5)
 
         return loss
     
@@ -230,7 +230,7 @@ class Seq2SeqModel(lightning.LightningModule):
         self.log("val_bleu", bleu_score, on_epoch=True, prog_bar=True)
 
         if batch_idx == 0:
-            self._log_translations(src_sent, y_logit, tgt_sent, n_examples=5)
+            self._log_translations(src_sent[:,1:], y_logit, tgt_sent, mode="val", n_examples=5)
 
         return loss
     
@@ -259,7 +259,7 @@ class Seq2SeqModel(lightning.LightningModule):
         self.log("test_bleu", bleu_score, on_epoch=True, prog_bar=True)
 
         if batch_idx == 0:
-            self._log_translations(src_sent, y_logit, tgt_sent, n_examples=5)
+            self._log_translations(src_sent[:,1:], y_logit, tgt_sent, mode="test", n_examples=5)
 
         return loss
     
@@ -310,7 +310,7 @@ class Seq2SeqModel(lightning.LightningModule):
 
         return bleu_score
     
-    def _log_translations(self, src, y_logit, tgt, n_examples=5):
+    def _log_translations(self, src, y_logit, tgt, mode="train", n_examples=5):
 
         pred = torch.argmax(y_logit, axis=2)    # argmax over vocab_size dimension
 
@@ -323,4 +323,4 @@ class Seq2SeqModel(lightning.LightningModule):
         data = [[s, p, t] for s,p,t in zip(src_texts, pred_texts, tgt_texts)]
         table = wandb.Table(data=data, columns=columns)
 
-        self.logger.experiment.log({"sample_translations": table})
+        self.logger.experiment.log({f"sample_translations_{mode}": table}, step=self.global_step)
