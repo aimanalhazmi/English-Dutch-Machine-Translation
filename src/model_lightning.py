@@ -117,17 +117,17 @@ class Seq2SeqModel(lightning.LightningModule):
         self.loss_fn = nn.CrossEntropyLoss(ignore_index=tgt_vocab.stoi["<pad>"])
 
         # gradient masking for pre-trained embeddings
-        frozen_src_embeddings = torch.tensor([i for i in range(len(src_vocab)) if i not in trainable_embeddings], dtype=torch.long)
-        frozen_tgt_embeddings = torch.tensor([i for i in range(len(tgt_vocab)) if i not in trainable_embeddings], dtype=torch.long)
+        self.frozen_src_embeddings = torch.tensor([i for i in range(len(src_vocab)) if i not in trainable_embeddings], dtype=torch.long)
+        self.frozen_tgt_embeddings = torch.tensor([i for i in range(len(tgt_vocab)) if i not in trainable_embeddings], dtype=torch.long)
 
         @self.encoder.embedding.weight.register_hook
         def mask_src_grad(grad):
-            grad[frozen_src_embeddings] = 0
+            grad[self.frozen_src_embeddings] = 0
             return grad
    
         @self.decoder.embedding.weight.register_hook
         def mask_tgt_grad(grad):
-            grad[frozen_tgt_embeddings] = 0
+            grad[self.frozen_tgt_embeddings] = 0
             return grad
    
 

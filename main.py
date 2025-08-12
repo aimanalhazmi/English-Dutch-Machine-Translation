@@ -79,12 +79,24 @@ def main():
             def __init__(self):
                 super().__init__()
 
-            def on_train_epoch_start(self, trainer, model):
+            def on_after_backward(self, trainer, model):
+                # Check encoder embedding grads
+                if model.encoder.embedding.weight.grad is not None:
+                    grad = model.encoder.embedding.weight.grad
+                    if model.frozen_src_embeddings is not None:
+                        frozen_norm = grad[model.frozen_src_embeddings].norm().item()
+                        trainable_norm = grad[[i for i in range(len(model.src_vocab)) if i not in set(model.frozen_src_embeddings.tolist())]].norm().item()
+                        trainer.logger.experiment.log("grad_norm_src_frozen", frozen_norm, prog_bar=True, on_step=True)
+                        trainer.logger.experiment.log("grad_norm_src_trainable", trainable_norm, prog_bar=True, on_step=True)
 
-                trainer.logger.experiment.log({
-                    "debug/unk_embedding": model.encoder.embedding.weight[1],
-                    "debug/fixed_embedding": model.encoder.embedding.weight[10]
-                })
+                # Check decoder embedding grads
+                if model.decoder.embedding.weight.grad is not None:
+                    grad = model.decoder.embedding.weight.grad
+                    if model.frozen_tgt_embeddings is not None:
+                        frozen_norm = grad[model.frozen_tgt_embeddings].norm().item()
+                        trainable_norm = grad[[i for i in range(len(model.tgt_vocab)) if i not in set(model.frozen_tgt_embeddings.tolist())]].norm().item()
+                        trainer.logger.experiment.log("grad_norm_tgt_frozen", frozen_norm, prog_bar=True, on_step=True)
+                        trainer.logger.experiment.log("grad_norm_tgt_trainable", trainable_norm, prog_bar=True, on_step=True)
 
         debug_callback = DebugCallback()
 
