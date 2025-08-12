@@ -323,4 +323,4 @@ class Seq2SeqModel(lightning.LightningModule):
         data = [[s, p, t] for s,p,t in zip(src_texts, pred_texts, tgt_texts)]
         table = wandb.Table(data=data, columns=columns)
 
-        self.logger.experiment.log({f"sample_translations_{mode}": table}, step=self.global_step)
+        self.logger.experiment.log({f"sample_translations_{mode}_{self.global_step}": table})
