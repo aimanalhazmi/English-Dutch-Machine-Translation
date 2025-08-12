@@ -86,8 +86,8 @@ def main():
                     if model.frozen_src_embeddings is not None:
                         frozen_norm = grad[model.frozen_src_embeddings].norm().item()
                         trainable_norm = grad[[i for i in range(len(model.src_vocab)) if i not in set(model.frozen_src_embeddings.tolist())]].norm().item()
-                        trainer.logger.experiment.log({"grad_norm_src_frozen": frozen_norm})
-                        trainer.logger.experiment.log({"grad_norm_src_trainable": trainable_norm})
+                        model.log("grad_norm_src_frozen", frozen_norm, on_epoch=True, on_step=False, prog_bar=False)
+                        model.log("grad_norm_src_trainable", trainable_norm, on_epoch=True, on_step=False, prog_bar=False)
 
                 # Check decoder embedding grads
                 if model.decoder.embedding.weight.grad is not None:
@@ -95,8 +95,19 @@ def main():
                     if model.frozen_tgt_embeddings is not None:
                         frozen_norm = grad[model.frozen_tgt_embeddings].norm().item()
                         trainable_norm = grad[[i for i in range(len(model.tgt_vocab)) if i not in set(model.frozen_tgt_embeddings.tolist())]].norm().item()
-                        trainer.logger.experiment.log({"grad_norm_tgt_frozen": frozen_norm})
-                        trainer.logger.experiment.log({"grad_norm_tgt_trainable": trainable_norm})
+                        model.log("grad_norm_tgt_frozen", frozen_norm, on_epoch=True, on_step=False, prog_bar=False)
+                        model.log("grad_norm_tgt_trainable", trainable_norm, on_epoch=True, on_step=False, prog_bar=False)
+
+                # check lstm grads
+                for name, param in model.encoder.rnn.named_parameters():
+                    if param.grad is not None:
+                        grad_norm = param.grad.norm().item()
+                        model.log(f"grad_norm_encoder_lstm_{name}", grad_norm, on_epoch=True, prog_bar=False, on_step=False)
+
+                for name, param in model.decoder.rnn.named_parameters():
+                    if param.grad is not None:
+                        grad_norm = param.grad.norm().item()
+                        model.log(f"grad_norm_decoder_lstm_{name}", grad_norm, on_epoch=True, prog_bar=False, on_step=False)
 
         debug_callback = DebugCallback()
 
