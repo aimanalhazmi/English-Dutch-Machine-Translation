@@ -30,8 +30,8 @@ def main():
         print(f"[Info] Selected {len(df_sampled):,} rows out of {len(df_clean):,} ({config.sample_frac * 100:.1f}% of preprocessed data)")
         train_df, val_df, test_df = split_dataset(df_sampled, val_test_size=config.val_test_size, test_size=config.test_size, random_state=0)
 
-        src_vocab_set = get_tokenized_vocab(df=train_df, lan=config.src_lang)     # vocab should be built only from training data
-        tgt_vocab_set = get_tokenized_vocab(df=train_df, lan=config.tgt_lang)
+        src_vocab_set = get_tokenized_vocab(df=train_df, lan=config.src_lang, min_freq=config.vocab_min_freq)     # vocab should be built only from training data
+        tgt_vocab_set = get_tokenized_vocab(df=train_df, lan=config.tgt_lang, min_freq=config.vocab_min_freq)
 
         src_emb_path, tgt_emb_path = get_embedding_models_paths(source_col=config.src_lang, target_col=config.tgt_lang, method=config.embedding_method)
 
@@ -44,17 +44,17 @@ def main():
 
         # init model
         model = Seq2SeqModel(src_vocab,
-                                tgt_vocab,
-                                config.embedding_dim,
-                                config.hidden_dim,
-                                config.n_layers,
-                                config.p_dropout,
-                                src_vocab.vectors,
-                                tgt_vocab.vectors,
-                                config.trainable_embeddings,
-                                config.teacher_forcing_ratio,
-                                config.teacher_forcing_ratio_decay,
-                                config.learning_rate)
+                            tgt_vocab,
+                            config.embedding_dim,
+                            config.hidden_dim,
+                            config.n_layers,
+                            config.p_dropout,
+                            src_vocab.vectors,
+                            tgt_vocab.vectors,
+                            config.trainable_embeddings,
+                            config.teacher_forcing_ratio,
+                            config.teacher_forcing_ratio_decay,
+                            config.learning_rate)
         
         # init wandb logger
         logger = lightning.pytorch.loggers.WandbLogger(

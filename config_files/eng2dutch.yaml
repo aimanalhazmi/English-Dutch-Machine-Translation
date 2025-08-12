@@ -29,6 +29,8 @@ parameters:
     value: 3
   max_len_tokens:
     value: 100
+  vocab_min_freq:
+    value: 1
   custom_nl_stopwords:
     value: ["we", "wij", "onze"]
   # data sampling
