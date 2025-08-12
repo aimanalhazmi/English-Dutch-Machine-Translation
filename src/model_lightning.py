@@ -192,8 +192,12 @@ class Seq2SeqModel(lightning.LightningModule):
 
         loss = self.loss_fn(y_logit_flat, tgt_sent_flat)
 
+        # calculate BLEU score
+        bleu_score = self._calculate_bleu_score(y_logit, tgt_sent)
+
         # logging
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
+        self.log("train_bleu", bleu_score, on_epoch=True, prog_bar=True)
         self.log("teacher_forcing_ratio", self.teacher_forcing_ratio, on_epoch=True, on_step=False)
 
         if batch_idx == 0:
