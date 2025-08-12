@@ -49,8 +49,8 @@ parameters:
     value: 3
   p_dropout:
     value: 0.1
-  freeze_embeddings:
-    value: True
+  trainable_embeddings:
+    value: [1,2,3]
   teacher_forcing_ratio:
     value: 0.5
   teacher_forcing_ratio_decay:

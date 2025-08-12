@@ -1,3 +1,4 @@
+from typing import List
 import torch 
 from torch import nn 
 import random 
@@ -94,7 +95,7 @@ class Seq2SeqModel(lightning.LightningModule):
                  p_dropout: float = 0.1,
                  src_embeddings = None,
                  tgt_embeddings = None,
-                 freeze_embeddings: bool = False,
+                 trainable_embeddings: List = [1,2,3],
                  teacher_forcing_ratio: float = 0.5,
                  teacher_forcing_decay: float = 0.95,
                  learning_rate: float = 1e-3):
@@ -105,8 +106,8 @@ class Seq2SeqModel(lightning.LightningModule):
         
         # init encoder and decoder 
         pad_idx = src_vocab.stoi["<pad>"]
-        self.encoder = Encoder(len(src_vocab), embedding_dim, hidden_dim, n_layers, src_embeddings, freeze_embeddings, pad_idx, p_dropout)
-        self.decoder = Decoder(len(tgt_vocab), embedding_dim, hidden_dim, n_layers, tgt_embeddings, freeze_embeddings, pad_idx, p_dropout)
+        self.encoder = Encoder(len(src_vocab), embedding_dim, hidden_dim, n_layers, src_embeddings, False, pad_idx, p_dropout)
+        self.decoder = Decoder(len(tgt_vocab), embedding_dim, hidden_dim, n_layers, tgt_embeddings, False, pad_idx, p_dropout)
 
         self.teacher_forcing_ratio = teacher_forcing_ratio
         self.src_vocab = src_vocab 
@@ -114,8 +115,22 @@ class Seq2SeqModel(lightning.LightningModule):
 
         # define loss function 
         self.loss_fn = nn.CrossEntropyLoss(ignore_index=tgt_vocab.stoi["<pad>"])
-   
 
+        # gradient masking for pre-trained embeddings
+        frozen_src_embeddings = torch.tensor([i for i in range(len(src_vocab)) if i not in trainable_embeddings], dtpye=torch.long)
+        frozen_tgt_embeddings = torch.tensor([i for i in range(len(tgt_vocab)) if i not in trainable_embeddings], dtpye=torch.long)
+
+        @self.encoder.embedding.weight.register_hook
+        def mask_src_grad(grad):
+            grad[frozen_src_embeddings] = 0
+            return grad
+   
+        @self.decoder.embedding.weight.register_hook
+        def mask_tgt_grad(grad):
+            grad[frozen_tgt_embeddings] = 0
+            return grad
+   
+   
     def forward(self, src_sent, tgt_sent, teacher_forcing_ratio=None):
 
         if teacher_forcing_ratio is None:

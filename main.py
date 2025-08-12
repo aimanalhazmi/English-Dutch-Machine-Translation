@@ -51,7 +51,7 @@ def main():
                                 config.p_dropout,
                                 src_vocab.vectors,
                                 tgt_vocab.vectors,
-                                config.freeze_embeddings,
+                                config.trainable_embeddings,
                                 config.teacher_forcing_ratio,
                                 config.teacher_forcing_ratio_decay,
                                 config.learning_rate)
