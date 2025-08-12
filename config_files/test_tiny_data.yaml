@@ -33,7 +33,7 @@ parameters:
     value: ["we", "wij", "onze"]
   # data sampling
   sample_frac:
-    value: 0.01
+    value: 0.001
   val_test_size:
     value: 0.4
   test_size:

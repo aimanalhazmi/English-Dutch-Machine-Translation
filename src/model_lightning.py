@@ -3,6 +3,8 @@ import torch
 from torch import nn 
 import random 
 import lightning
+from torchmetrics.text import BLEUScore
+import wandb
 
 class Encoder(nn.Module):
 
@@ -116,6 +118,9 @@ class Seq2SeqModel(lightning.LightningModule):
         # define loss function 
         self.loss_fn = nn.CrossEntropyLoss(ignore_index=tgt_vocab.stoi["<pad>"])
 
+        # BLEU metric
+        self.bleu = BLEUScore()
+
         # gradient masking for pre-trained embeddings
         self.frozen_src_embeddings = torch.tensor([i for i in range(len(src_vocab)) if i not in trainable_embeddings], dtype=torch.long)
         self.frozen_tgt_embeddings = torch.tensor([i for i in range(len(tgt_vocab)) if i not in trainable_embeddings], dtype=torch.long)
@@ -179,14 +184,20 @@ class Seq2SeqModel(lightning.LightningModule):
 
         ## calculate loss
         # reshape and ignore first <sos> token
-        y_logit = y_logit[:,1:].reshape(-1, y_logit.shape[-1])
-        tgt_sent = tgt_sent[:, 1:].reshape(-1)
+        y_logit = y_logit[:,1:]
+        tgt_sent = tgt_sent[:, 1:]
 
-        loss = self.loss_fn(y_logit, tgt_sent)
+        y_logit_flat = y_logit.reshape(-1, y_logit.shape[-1])
+        tgt_sent_flat = tgt_sent.reshape(-1)
+
+        loss = self.loss_fn(y_logit_flat, tgt_sent_flat)
 
         # logging
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
         self.log("teacher_forcing_ratio", self.teacher_forcing_ratio, on_epoch=True, on_step=False)
+
+        if batch_idx == 0:
+            self._log_translations(src_sent, y_logit, tgt_sent, n_examples=5)
 
         return loss
     
@@ -199,13 +210,23 @@ class Seq2SeqModel(lightning.LightningModule):
 
         ## calculate loss
         # reshape and ignore first <sos> token
-        y_logit = y_logit[:,1:].reshape(-1, y_logit.shape[-1])
-        tgt_sent = tgt_sent[:, 1:].reshape(-1)
+        y_logit = y_logit[:,1:]
+        tgt_sent = tgt_sent[:, 1:]
 
-        loss = self.loss_fn(y_logit, tgt_sent)
+        y_logit_flat = y_logit.reshape(-1, y_logit.shape[-1])
+        tgt_sent_flat = tgt_sent.reshape(-1)
+
+        loss = self.loss_fn(y_logit_flat, tgt_sent_flat)
+
+        # calculate BLEU score
+        bleu_score = self._calculate_bleu_score(y_logit, tgt_sent)
 
         # logging
         self.log("val_loss", loss, on_epoch=True, prog_bar=True)
+        self.log("val_bleu", bleu_score, on_epoch=True, prog_bar=True)
+
+        if batch_idx == 0:
+            self._log_translations(src_sent, y_logit, tgt_sent, n_examples=5)
 
         return loss
     
@@ -218,13 +239,23 @@ class Seq2SeqModel(lightning.LightningModule):
 
         ## calculate loss
         # reshape and ignore first <sos> token
-        y_logit = y_logit[:,1:].reshape(-1, y_logit.shape[-1])
-        tgt_sent = tgt_sent[:, 1:].reshape(-1)
+        y_logit = y_logit[:,1:]
+        tgt_sent = tgt_sent[:, 1:]
 
-        loss = self.loss_fn(y_logit, tgt_sent)
+        y_logit_flat = y_logit.reshape(-1, y_logit.shape[-1])
+        tgt_sent_flat = tgt_sent.reshape(-1)
+
+        loss = self.loss_fn(y_logit_flat, tgt_sent_flat)
+
+        # calculate BLEU score
+        bleu_score = self._calculate_bleu_score(y_logit, tgt_sent)
 
         # logging
         self.log("test_loss", loss, on_epoch=True, prog_bar=True)
+        self.log("test_bleu", bleu_score, on_epoch=True, prog_bar=True)
+
+        if batch_idx == 0:
+            self._log_translations(src_sent, y_logit, tgt_sent, n_examples=5)
 
         return loss
     
@@ -239,4 +270,53 @@ class Seq2SeqModel(lightning.LightningModule):
         # teacher forcing ratio decay
         self.teacher_forcing_ratio = max(0.1, self.teacher_forcing_ratio * self.hparams.teacher_forcing_decay)
 
+    def _translate(self, idxs):
+        """
+        Translate from indices to target vocab words. 
+        """
+        # idxs: (batch_size, seq_length)
+        # return: List (batch_size) 
 
+        texts = []
+
+        # loop over examples in the batch
+        for i in range(idxs.shape[0]):
+
+            # predicted text (words)
+            tokens = []
+            for token_idx in idxs[i,:]:
+                if token_idx.item() == self.tgt_vocab.stoi["<eos>"] or token_idx.item() == self.tgt_vocab.stoi["<pad>"]:
+                    break
+                tokens.append(self.tgt_vocab.itos[token_idx.item()])
+            texts.append(" ".join(tokens))
+
+        return texts
+
+    def _calculate_bleu_score(self, y_logit, tgt_sent):
+
+        pred = torch.argmax(y_logit, axis=2)    # argmax over vocab_size dimension
+
+        # convert prediction and target to texts
+        pred_texts = self._translate(pred)
+        tgt_texts = self._translate(tgt_sent)
+
+        # convert list to correct format for BLEUScore metric
+        tgt_texts = [[txt] for txt in tgt_texts]
+        bleu_score = self.bleu(pred_texts, tgt_texts)
+
+        return bleu_score
+    
+    def _log_translations(self, src, y_logit, tgt, n_examples=5):
+
+        pred = torch.argmax(y_logit, axis=2)    # argmax over vocab_size dimension
+
+        # convert to texts
+        src_texts = self._translate(src[:n_examples])
+        pred_texts = self._translate(pred[:n_examples])
+        tgt_texts = self._translate(tgt[:n_examples])
+
+        columns = ["Source", "Prediction", "Reference"]
+        data = [[s, p, t] for s,p,t in zip(src_texts, pred_texts, tgt_texts)]
+        table = wandb.Table(data=data, columns=columns)
+
+        self.logger.experiment.log({"sample_translations": table})
