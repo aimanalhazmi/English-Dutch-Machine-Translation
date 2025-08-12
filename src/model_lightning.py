@@ -274,9 +274,9 @@ class Seq2SeqModel(lightning.LightningModule):
         # teacher forcing ratio decay
         self.teacher_forcing_ratio = max(0.1, self.teacher_forcing_ratio * self.hparams.teacher_forcing_decay)
 
-    def _translate(self, idxs):
+    def _translate(self, idxs, vocab):
         """
-        Translate from indices to target vocab words. 
+        Translate from indices to vocab words. 
         """
         # idxs: (batch_size, seq_length)
         # return: List (batch_size) 
@@ -289,9 +289,9 @@ class Seq2SeqModel(lightning.LightningModule):
             # predicted text (words)
             tokens = []
             for token_idx in idxs[i,:]:
-                if token_idx.item() == self.tgt_vocab.stoi["<eos>"] or token_idx.item() == self.tgt_vocab.stoi["<pad>"]:
+                if token_idx.item() == vocab.stoi["<eos>"] or token_idx.item() == vocab.stoi["<pad>"]:
                     break
-                tokens.append(self.tgt_vocab.itos[token_idx.item()])
+                tokens.append(vocab.itos[token_idx.item()])
             texts.append(" ".join(tokens))
 
         return texts
@@ -301,8 +301,8 @@ class Seq2SeqModel(lightning.LightningModule):
         pred = torch.argmax(y_logit, axis=2)    # argmax over vocab_size dimension
 
         # convert prediction and target to texts
-        pred_texts = self._translate(pred)
-        tgt_texts = self._translate(tgt_sent)
+        pred_texts = self._translate(pred, self.tgt_vocab)
+        tgt_texts = self._translate(tgt_sent, self.tgt_vocab)
 
         # convert list to correct format for BLEUScore metric
         tgt_texts = [[txt] for txt in tgt_texts]
@@ -315,9 +315,9 @@ class Seq2SeqModel(lightning.LightningModule):
         pred = torch.argmax(y_logit, axis=2)    # argmax over vocab_size dimension
 
         # convert to texts
-        src_texts = self._translate(src[:n_examples])
-        pred_texts = self._translate(pred[:n_examples])
-        tgt_texts = self._translate(tgt[:n_examples])
+        src_texts = self._translate(src[:n_examples], self.src_vocab)
+        pred_texts = self._translate(pred[:n_examples], self.tgt_vocab)
+        tgt_texts = self._translate(tgt[:n_examples], self.tgt_vocab)
 
         columns = ["Source", "Prediction", "Reference"]
         data = [[s, p, t] for s,p,t in zip(src_texts, pred_texts, tgt_texts)]
