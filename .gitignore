@@ -17,3 +17,4 @@ embedding_models/*
 
 testing/
 .vscode/
+debugging.ipynb

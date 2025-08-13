@@ -42,6 +42,11 @@ def main():
         # init data module
         data_module = TranslationDataModule(train_df, val_df, test_df, config.src_lang, config.tgt_lang, src_vocab, tgt_vocab, config.batch_size)
 
+        assert(src_vocab.stoi["<unk>"] == tgt_vocab.stoi["<unk>"])
+        assert(src_vocab.stoi["<sos>"] == tgt_vocab.stoi["<sos>"])
+        assert(src_vocab.stoi["<eos>"] == tgt_vocab.stoi["<eos>"])
+        trainable_embeddings = [src_vocab.stoi["<unk>"], src_vocab.stoi["<sos>"], src_vocab.stoi["<eos>"]]
+
         # init model
         model = Seq2SeqModel(src_vocab,
                             tgt_vocab,
@@ -51,7 +56,7 @@ def main():
                             config.p_dropout,
                             src_vocab.vectors,
                             tgt_vocab.vectors,
-                            config.trainable_embeddings,
+                            trainable_embeddings,
                             config.teacher_forcing_ratio,
                             config.teacher_forcing_ratio_decay,
                             config.learning_rate)

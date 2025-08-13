@@ -15,7 +15,7 @@ class PretrainedEmbeddingVocab:
             if token not in self.stoi:
                 self.stoi[token] = len(self.itos)
                 self.itos.append(token)
-                self.vectors.append([0.0] * embedding_dim)
+                self.vectors.append((0.1*torch.randn(embedding_dim)).tolist())
 
         print(f"[info] Loading pretrained embedding from {embedding_path}]")
 

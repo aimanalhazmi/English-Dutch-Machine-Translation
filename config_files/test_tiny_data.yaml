@@ -51,8 +51,6 @@ parameters:
     value: 3
   p_dropout:
     value: 0.3
-  trainable_embeddings:
-    value: [1,2,3]
   teacher_forcing_ratio:
     value: 0.9
   teacher_forcing_ratio_decay:

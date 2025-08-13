@@ -1,0 +1,28 @@
+# languages
+src_lang: "English"
+tgt_lang: "Dutch"
+# pre-trained embeddings
+embedding_method: "fasttext"
+embedding_dim: 300
+# pre-processing
+remove_punct: False # Keep punctuation for translation context
+remove_stopwords: False # Keep all words since stopwords matter in translation
+remove_nums: True
+min_len_chars: 3
+max_len_tokens: 100
+vocab_min_freq: 1
+custom_nl_stopwords: ["we", "wij", "onze"]
+# data sampling
+sample_frac: 0.001
+val_test_size: 0.4
+test_size: 0.5 # Split from remaining 40% into 20% val and 20% test
+# model & training
+n_epochs: 10
+batch_size: 64
+hidden_dim: 512
+n_layers: 3
+p_dropout: 0.3
+teacher_forcing_ratio: 0.9
+teacher_forcing_ratio_decay: 0.99
+learning_rate: !!float 1e-4
+gradient_clip_val: 1.0
