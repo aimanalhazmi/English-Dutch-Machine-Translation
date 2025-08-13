@@ -20,12 +20,8 @@ class Encoder(nn.Module):
         else:
             self.embedding = nn.Embedding.from_pretrained(pretrained_embeddings, freeze=freeze_embeddings, padding_idx=pad_idx)
 
-        self.rnn = nn.LSTM(embedding_dim, hidden_dim, n_layers, batch_first=True, bidirectional=True, dropout=p_dropout)
+        self.rnn = nn.LSTM(embedding_dim, hidden_dim, n_layers, batch_first=True, bidirectional=False, dropout=p_dropout)
         self.dropout = nn.Dropout(p_dropout)
-
-        # projection layers to project from bidirectional encoder to unidirectional decoder
-        self.hidden_proj = nn.Linear(2*hidden_dim, hidden_dim)
-        self.cell_proj = nn.Linear(2*hidden_dim, hidden_dim)
 
     def forward(self, x):
 
@@ -35,19 +31,6 @@ class Encoder(nn.Module):
         embedded = self.dropout(self.embedding(x))  # shape: (batch_size, seq_length, embedding_dim)
 
         _ , (hidden, cell) = self.rnn(embedded) # shape hidden/cell: (2*n_layers, batch_size, hidden_dim)
-
-        ## project from bidirectional to unidirectional
-        # separate forward and backward states
-        hidden = hidden.reshape(self.n_layers, 2, batch_size, self.hidden_dim)
-        cell = cell.reshape(self.n_layers, 2, batch_size, self.hidden_dim)
-
-        # concatenate (in hidden_dim axis)
-        hidden = torch.cat([hidden[:, 0], hidden[:, 1]], axis=2)
-        cell = torch.cat([cell[:, 0], cell[:, 1]], axis=2)
-
-        # project down to single hidden_dim (linear layer + tanh)
-        hidden = torch.tanh(self.hidden_proj(hidden))
-        cell = torch.tanh(self.cell_proj(cell))
 
         return hidden, cell
     
