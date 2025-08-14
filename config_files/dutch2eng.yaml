@@ -1,0 +1,61 @@
+name: eng-to-dutch
+program: main.py
+project: rnn-machine-translation
+entity: jonaspeschel-technical-university-of-berlin
+method: grid 
+# run_cap: 4
+metric:
+  goal: minimize
+  name: test_loss
+parameters:
+  # languages
+  src_lang:
+    value: "English"
+  tgt_lang:
+    value: "Dutch"
+  # pre-trained embeddings
+  embedding_method:
+    value: "fasttext"
+  embedding_dim:
+    value: 300
+  # pre-processing
+  remove_punct:
+    value: False # Keep punctuation for translation context
+  remove_stopwords:
+    value: False # Keep all words since stopwords matter in translation
+  remove_nums:
+    value: True
+  min_len_chars:
+    value: 3
+  max_len_tokens:
+    value: 100
+  vocab_min_freq:
+    value: 1
+  custom_nl_stopwords:
+    value: ["we", "wij", "onze"]
+  # data sampling
+  sample_frac:
+    value: 0.01
+  val_test_size:
+    value: 0.4
+  test_size:
+    value: 0.5 # Split from remaining 40% into 20% val and 20% test
+  # model & training
+  n_epochs:
+    value: 10
+  batch_size:
+    value: 128
+  hidden_dim:
+    value: 512
+  n_layers:
+    value: 3
+  p_dropout:
+    value: 0.3
+  teacher_forcing_ratio:
+    value: 0.5
+  teacher_forcing_ratio_decay:
+    value: 1.0
+  learning_rate:
+    value: !!float 1e-4
+  gradient_clip_val:
+    value: 1.0
