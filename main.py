@@ -1,4 +1,5 @@
 import os
+import random
 
 import torch
 from src.preprocessing import preprocess_dataframe, get_tokenized_vocab
@@ -26,10 +27,11 @@ if __name__ == '__main__':
 
     df_sampled = df_clean.sample(frac=config.sample_frac, random_state=config.random_state).reset_index(drop=True)
     print(f"[Info] Selected {len(df_sampled):,} rows out of {len(df_clean):,} ({config.sample_frac * 100:.1f}% of preprocessed data)")
-    df_train, df_val, df_test = split_dataset(df_sampled, val_test_size=config.val_test_size, test_size=config.test_size, random_state=config.random_state)
+    df_train, df_val, df_test = split_dataset(df_sampled.copy(), val_test_size=config.val_test_size, test_size=config.test_size, random_state=config.random_state)
 
-    src_vocab_set = get_tokenized_vocab(df=df_sampled, lan=config.source_col)
-    tgt_vocab_set = get_tokenized_vocab(df=df_sampled, lan=config.target_col)
+    print(df_train.head())
+    src_vocab_set = get_tokenized_vocab(df=df_sampled.copy(), lan=config.source_col)
+    tgt_vocab_set = get_tokenized_vocab(df=df_sampled.copy(), lan=config.target_col)
 
     src_emb_path, tgt_emb_path = get_embedding_models_paths(source_col=config.source_col, target_col=config.target_col, method=config.embedding_method)
 
@@ -40,6 +42,11 @@ if __name__ == '__main__':
     src_vocab = PretrainedEmbeddingVocab(embedding_path=src_emb_path, embedding_dim=config.embedding_dim, restrict_to_vocab=src_vocab_set)
     tgt_vocab = PretrainedEmbeddingVocab(embedding_path=tgt_emb_path, embedding_dim=config.embedding_dim, restrict_to_vocab=tgt_vocab_set)
 
+    idx =  random.randint(0, len(src_vocab.itos) - 1)
+    print("\nsource:\n", src_vocab.itos[idx])
+    print("target:\n", tgt_vocab.itos[idx])
+
+    print("Sample data:\n", df_train.iloc[random.randint(0, len(df_train) - 1)])
     os.makedirs("outputs", exist_ok=True)
     train_loss, val_loss, bleu_scores = train.train_evaluate(df_train=df_train, df_val=df_val, src_vocab=src_vocab, tgt_vocab=tgt_vocab, device=DEVICE)
 
