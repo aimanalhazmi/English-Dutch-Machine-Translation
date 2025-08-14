@@ -99,14 +99,34 @@ def collate_fn(batch):
     return srcs_padded, tgts_padded
 
 
-def compute_class_weights(train_dataset):
+def compute_class_weights(train_dataset, tgt_vocab):
+
+    pad_idx = tgt_vocab.stoi["<pad>"]
+    unk_idx = tgt_vocab.stoi["<unk>"]
+    sos_idx = tgt_vocab.stoi["<sos>"]
+    eos_idx = tgt_vocab.stoi["<eos>"]
+
+    special_tokens = [pad_idx, unk_idx, sos_idx, eos_idx]
 
     tgt_ids = []
     for src, tgt in train_dataset:
         tgt_ids.extend(tgt.tolist())
 
+    # remove special tokens from the data
+    tgt_ids = [i for i in tgt_ids if i not in special_tokens]
+
     counter = Counter(tgt_ids)
-    n_occurrences = [n for _, n in counter.items()]
-    class_weights = 1/torch.tensor(n_occurrences)
-    class_weights = class_weights/class_weights.sum()
+
+    class_weights = torch.ones(len(tgt_vocab))
+    for idx, n in counter.items():
+
+        class_weights[idx] = 1/n
+
+    # add weights for special tokens
+    class_weights[pad_idx] = 0.1
+    class_weights[sos_idx] = 0.5
+    class_weights[eos_idx] = 0.5
+    class_weights[unk_idx] = 0.5
+
+    class_weights = class_weights/class_weights.mean()
     return class_weights

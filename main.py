@@ -49,7 +49,8 @@ def main():
         trainable_embeddings = [src_vocab.stoi["<unk>"], src_vocab.stoi["<sos>"], src_vocab.stoi["<eos>"]]
 
         # compute class weights for weighted loss
-        class_weights = compute_class_weights(data_module.train_dataset)
+        data_module.setup()
+        class_weights = compute_class_weights(data_module.train_dataset, tgt_vocab)
 
         # init model
         model = Seq2SeqModel(src_vocab,
