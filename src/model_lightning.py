@@ -6,6 +6,8 @@ import lightning
 from torchmetrics.text import BLEUScore
 import wandb
 
+from src.focal_loss import WeightedFocalLoss
+
 class Encoder(nn.Module):
 
     def __init__(self, src_vocab_size, embedding_dim, hidden_dim, n_layers, pretrained_embeddings=None, freeze_embeddings=False, pad_idx=0, p_dropout=0.1):
@@ -83,7 +85,10 @@ class Seq2SeqModel(lightning.LightningModule):
                  trainable_embeddings: List = [1,2,3],
                  teacher_forcing_ratio: float = 0.5,
                  teacher_forcing_decay: float = 0.95,
-                 learning_rate: float = 1e-3):
+                 learning_rate: float = 1e-3,
+                 class_weights = None,
+                 focal_alpha: float = 1.0,
+                 focal_gamma: float = 2.0):
 
         super().__init__()
 
@@ -99,7 +104,8 @@ class Seq2SeqModel(lightning.LightningModule):
         self.tgt_vocab = tgt_vocab
 
         # define loss function 
-        self.loss_fn = nn.CrossEntropyLoss(ignore_index=tgt_vocab.stoi["<pad>"])
+        # self.loss_fn = nn.CrossEntropyLoss(ignore_index=tgt_vocab.stoi["<pad>"])
+        self.loss_fn = WeightedFocalLoss(class_weights=class_weights, alpha=focal_alpha, gamma=focal_gamma, ignore_idx=pad_idx)
 
         # BLEU metric
         self.bleu = BLEUScore()

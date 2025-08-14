@@ -9,6 +9,7 @@ import lightning
 from lightning.pytorch.callbacks import ModelCheckpoint, EarlyStopping, TQDMProgressBar
 from src.dataset import TranslationDataModule
 from src.model_lightning import Seq2SeqModel
+from src.utils import compute_class_weights
 
 
 def main():
@@ -47,6 +48,9 @@ def main():
         assert(src_vocab.stoi["<eos>"] == tgt_vocab.stoi["<eos>"])
         trainable_embeddings = [src_vocab.stoi["<unk>"], src_vocab.stoi["<sos>"], src_vocab.stoi["<eos>"]]
 
+        # compute class weights for weighted loss
+        class_weights = compute_class_weights(data_module.train_dataset)
+
         # init model
         model = Seq2SeqModel(src_vocab,
                             tgt_vocab,
@@ -59,7 +63,10 @@ def main():
                             trainable_embeddings,
                             config.teacher_forcing_ratio,
                             config.teacher_forcing_ratio_decay,
-                            config.learning_rate)
+                            config.learning_rate,
+                            class_weights,
+                            config.focal_alpha,
+                            config.focal_gamma)
         
         # init wandb logger
         logger = lightning.pytorch.loggers.WandbLogger(

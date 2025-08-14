@@ -26,3 +26,6 @@ teacher_forcing_ratio: 0.9
 teacher_forcing_ratio_decay: 1.0
 learning_rate: !!float 1e-4
 gradient_clip_val: 1.0
+# focal loss
+focal_alpha: 1.0
+focal_gamma: 2.0

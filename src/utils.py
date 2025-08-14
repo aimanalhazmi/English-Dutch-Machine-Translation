@@ -1,6 +1,7 @@
 import os
 from sklearn.model_selection import train_test_split
 import torch
+from collections import Counter
 
 
 def split_dataset(df, val_test_size=0.3, test_size=0.66, random_state=42):
@@ -96,3 +97,16 @@ def collate_fn(batch):
     srcs_padded = torch.nn.utils.rnn.pad_sequence(srcs, batch_first=True, padding_value=0)  # padding value should be equal to the id of the <pad> token!
     tgts_padded = torch.nn.utils.rnn.pad_sequence(tgts, batch_first=True, padding_value=0)
     return srcs_padded, tgts_padded
+
+
+def compute_class_weights(train_dataset):
+
+    tgt_ids = []
+    for src, tgt in train_dataset:
+        tgt_ids.extend(tgt.tolist())
+
+    counter = Counter(tgt_ids)
+    n_occurrences = [n for _, n in counter.items()]
+    class_weights = 1/torch.tensor(n_occurrences)
+    class_weights = class_weights/class_weights.sum()
+    return class_weights
