@@ -10,7 +10,7 @@ from lightning.pytorch.callbacks import ModelCheckpoint, EarlyStopping, TQDMProg
 from src.dataset import TranslationDataModule
 from src.model_lightning import Seq2SeqModel
 from src.utils import compute_class_weights
-
+import os
 
 def main():
 
@@ -24,6 +24,7 @@ def main():
             "English": "data/europarl-v7.nl-en.en",
             "Dutch": "data/europarl-v7.nl-en.nl"
         }
+        os.makedirs("outputs", exist_ok=True)
 
         df = load_data_as_df(source_file=data_files[config.src_lang], source_col=config.src_lang, target_file=data_files[config.tgt_lang], target_col=config.tgt_lang)
         df_clean = preprocess_dataframe(df=df, source_col=config.src_lang, target_col=config.tgt_lang, config=config)

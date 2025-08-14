@@ -2,7 +2,7 @@
 src_lang: "English"
 tgt_lang: "Dutch"
 # pre-trained embeddings
-embedding_method: "fasttext"
+embedding_method: "fasttext" #or glove_fasttext
 embedding_dim: 300
 # pre-processing
 remove_punct: False # Keep punctuation for translation context

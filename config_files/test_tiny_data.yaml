@@ -1,7 +1,6 @@
 name: eng-to-dutch
 program: main.py
 project: rnn-machine-translation
-entity: jonaspeschel-technical-university-of-berlin
 method: grid 
 # run_cap: 4
 metric:

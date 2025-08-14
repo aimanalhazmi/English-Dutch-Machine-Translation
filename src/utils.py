@@ -4,14 +4,14 @@ import torch
 from collections import Counter
 
 
-def split_dataset(df, val_test_size=0.3, test_size=0.66, random_state=42):
+def split_dataset(df, val_test_size=0.4, test_size=0.5, random_state=42):
     """
     Splits a dataset into train, validation, and test sets.
         df (pd.DataFrame): Input dataset.
         val_test_size (float): Fraction for (validation + test) combined split
-                               (e.g., 0.3 results in 70% train, 30% temp (val+test)).
+                               (e.g., 0.3 results in 60% train, 40% temp (val+test)).
         test_size (float): Fraction of the temp set to allocate for test
-                           (e.g., 0.66 → splits 30% temp into ~10% val, ~20% test).
+                           (e.g., 0.5 → splits 40% temp into 20% val, 20% test).
     """
     assert 0 < val_test_size < 1, "val_test_size must be between 0 and 1"
     assert 0 < test_size < 1, "test_size must be between 0 and 1"

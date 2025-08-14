@@ -40,6 +40,9 @@ english-dutch-machine-translation/
 
 ## Quick Start
 
+> **Important:** Before running the project, make sure you have:
+> 1. Downloaded and prepared the dataset (see [data/README.md](data/README.md) for instructions).
+> 2. Downloaded the required pre-trained embeddings (see [embedding_models/README.md](embedding_models/README.md) for instructions).
 ### 1. Clone the repository
 ```bash
 git clone https://github.com/aimanalhazmi/English-Dutch-Machine-Translation.git
@@ -73,3 +76,23 @@ source .venv/bin/activate
 
 
 ---
+
+### How to Run the Sweep
+
+#### 1. Log in to wandb (one-time setup)
+
+```bash
+wandb login
+```
+#### 2. Start a sweep (example):
+```bash
+wandb sweep config_files/dutch2eng.yaml
+```
+This command will output a sweep ID, e.g., username/project/sweepid123.
+#### 3. Launch agents to run the sweep:
+```bash
+wandb agent <your-entity>/<project-name>/<sweep-id>
+```
+Repeat for any sweep file by changing the YAML path in step 2.
+Each agent will run one combination of parameters until all are explored.
+You can then view and compare runs at: https://wandb.ai.

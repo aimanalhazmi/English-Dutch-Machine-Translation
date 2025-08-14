@@ -1,7 +1,6 @@
 name: eng-to-dutch
 program: main.py
 project: rnn-machine-translation
-entity: jonaspeschel-technical-university-of-berlin
 method: grid 
 # run_cap: 4
 metric:
@@ -15,7 +14,7 @@ parameters:
     value: "Dutch"
   # pre-trained embeddings
   embedding_method:
-    value: "fasttext"
+    value: "fasttext" #or glove_fasttext
   embedding_dim:
     value: 300
   # pre-processing
