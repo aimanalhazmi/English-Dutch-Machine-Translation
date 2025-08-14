@@ -104,8 +104,8 @@ class Seq2SeqModel(lightning.LightningModule):
         self.tgt_vocab = tgt_vocab
 
         # define loss function 
-        # self.loss_fn = nn.CrossEntropyLoss(ignore_index=tgt_vocab.stoi["<pad>"])
-        self.loss_fn = WeightedFocalLoss(class_weights=class_weights, alpha=focal_alpha, gamma=focal_gamma, ignore_idx=pad_idx)
+        self.loss_fn = nn.CrossEntropyLoss(ignore_index=pad_idx, weight=class_weights)
+        # self.loss_fn = WeightedFocalLoss(class_weights=class_weights, alpha=focal_alpha, gamma=focal_gamma, ignore_idx=pad_idx)
 
         # BLEU metric
         self.bleu = BLEUScore()
