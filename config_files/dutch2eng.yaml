@@ -35,7 +35,7 @@ parameters:
     value: ["we", "wij", "onze"]
   # data sampling
   sample_frac:
-    value: 0.01
+    value: 0.001
   val_test_size:
     value: 0.4
   test_size:
@@ -59,3 +59,8 @@ parameters:
     value: !!float 1e-4
   gradient_clip_val:
     value: 1.0
+  # focal loss
+  focal_alpha: 
+    value: 1.0
+  focal_gamma: 
+    value: 2.0
